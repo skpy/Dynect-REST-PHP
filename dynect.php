@@ -1,23 +1,4 @@
 <?php
-/*
-
-Dynect-PHP - a simple PHP library for using the Dynect API
-		http://dyn.com/developer
-
-   Copyright 2011 Scott Merrill
-
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-
-       http://www.apache.org/licenses/LICENSE-2.0
-
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
-*/
 class dynect
 {
 
@@ -425,18 +406,73 @@ class dynect
 
 	/*
 	 * create a new HTTP redirect
+	 * @zone string name of the zone in which the redirect will be created
+	 * @fqdn string FQDN to redirect
+	 * @target string full URI (http://.../) of target to which request will be redirected
+	 * @code int 301 (permanent) or 302 (temporary) response to send
+	 * @uri bool whether to preserve the original URI
+	 * @return bool success or failure
 	 */
+	public function redirectCreate( $zone, $fqdn, $target, $code = 302, $uri = true )
+	{
+		$keep = ( $uri ) ? 'Y' : 'N';
+		$args = array( 'code' => $code, 'keep_uri' => $keep, 'url' => $target );
+		$result = $this->execute( "HTTPRedirect/$zone/$fqdn", 'POST', $args );
+                if ( 'success' == $result->status ) {
+			return TRUE;
+		}
+		return FALSE;
+	}
 
 	/*
 	 * delete an HTTP redirect
+	 * @zone string name of zone containing the redirect to delete
+	 * @fqdn string FQDN of the redirect to delete
+	 * @return bool success or failure
 	 */
+	public function redirectDelete( $zone, $fqdn )
+	{
+		$result = $this->execute( "HTTPRedirect/$zone/$fqdn", 'DELETE' );
+		if ( 'success' == $result->status ) {
+			return TRUE;
+		}
+		return FALSE;
+	}
 
 	/*
 	 * get a list of HTTP redirects
+	 * @zone string name of zone to query
+	 * @return mixed array of redirects or boolean false
 	 */
+	public function redirectGetList( $zone )
+	{
+		$result = $this->execute( "HTTPRedirect/$zone", 'GET' );
+		if ( 'success' == $result->status ) {
+			if ( empty ( $result->status ) ) {
+				return FALSE;
+			}
+			$redirects = array();
+			foreach ( $result->data as $data ) {
+				$redirects[] = rtrim( str_replace( "/REST/HTTPRedirect/$zone/", '', $data ), '/' );
+			}
+			return $redirects;
+		}
+		return FALSE;
+	}
 
 	/*
 	 * get details of a specific HTTP redirect
+	 * @zone string name of zone to query
+	 * @fqdn string FQDN of the redirect to query
+	 * @return mixed Object of Dynect data or boolean false
 	 */
+	public function redirectGet( $zone, $fqdn )
+	{
+		$result = $this->execute( "HTTPRedirect/$zone/$fqdn", 'GET' );
+		if ( 'success' == $result->status ) {
+			return $result->data;
+		}
+		return FALSE;
+	}
 }
 ?>
