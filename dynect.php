@@ -56,6 +56,32 @@ class dynect
 	}
 
 	/*
+	 * parse a Dyn object into an associative array
+	 * @data object an object of Dyn data
+	 * @return array Associative array of object key/value pairs
+	 */
+	private function parse_dyn_object( $data )
+	{
+		$arr = array();
+		foreach ( $data as $key => $value )
+		{
+			if ( 'rdata' == $key )
+			{
+				continue;
+			}
+			$arr[$key] = $value;
+		}
+		if ( isset( $data->rdata ) )
+		{
+			foreach ( $data->rdata as $key => $value )
+			{
+				$arr[$key] = $value;
+			}
+		}
+		return $arr;
+	}
+
+	/*
 	 * log into the Dynect API and obtain an API token
 	 * @return bool success or failure
 	 */
@@ -188,14 +214,14 @@ class dynect
 	/*
 	 * get details of a specific zone
 	 * @zone string Zone name
-	 * @return mixed Object of zone data or boolean false
+	 * @return mixed Associative array of zone data or boolean false
 	 */
 	public function zoneGet( $zone )
 	{
 		$result = $this->execute( "Zone/$zone", 'GET' );
 		if ( 'success' == $result->status )
 		{
-			return $result->data;
+			return $this->parse_dyn_object( $result->data );
 		}
 		return FALSE;
 	}
@@ -308,14 +334,14 @@ class dynect
 	 * @zone string name of the zone containing the A record
 	 * @fqdn string FQDN of the A record to query
 	 * @id int Dynect ID of the record
-	 * @return mixed Object of record data, or boolean false
+	 * @return mixed Associative array of record data, or boolean false
 	 */
 	public function arecordGet( $zone, $fqdn, $id = '' )
 	{
 		$result = $this->execute( "ARecord/$zone/$fqdn/$id", 'GET' );
 		if ( 'success' == $result->status )
 		{
-			return $result->data;
+			return $this->parse_dyn_object( $result->data );
 		}
 		return FALSE;
 	}
@@ -390,14 +416,89 @@ class dynect
 	 * @zone string name of the zone containing the CNAME
 	 * @fqdn string FQDN of the CNAME
 	 * @id int Dynect ID of the CNAME
-	 * @return mixed Object of Dynect data or boolean false
+	 * @return mixed Associative array of Dynect data or boolean false
 	 */
 	public function cnameGet( $zone, $fqdn, $id )
 	{
 		$result = $this->execute( "CNAMERecord/$zone/$fqdn/$id", 'GET' );
 		if ( 'success' == $result->status )
 		{
-			return $result->data;
+			return $this->parse_dyn_object( $result->data );
+		}
+		return FALSE;
+	}
+
+/***** MX Records *****/
+	/*
+	 * add a new MX record
+	 * @zone string the zone in which to add the MX
+	 * @fqdn string the FQDN of the host for which the MX is added
+	 * @exchange string the FQDN of the host handling mail
+	 * @preference int the ranked preference for the exchange
+	 * @ttl int optional TTL. Zone default will be used if not supplied
+	 * @return bool success or failure
+	 */
+	public function mxAdd( $zone, $fqdn, $exchange, $preference, $ttl = 0 )
+	{
+		$result = $this->execute( "MXRecord/$zone/$fqdn", 'POST', array( 'exchange' => $exchange, 'preference' => $preference, 'ttl' => $ttl ) );
+		if ( 'success' == $result->status )
+		{
+			return TRUE;
+		}
+		return FALSE;
+	}
+
+	/*
+	 * delete an MX record
+	 * @zone string the zone from which to delete the MX
+	 * @fqdn string the FQDN of the host from which to delete the MX
+	 * @id int the Dynect ID of the MX record to delete
+	 * @return bool success or failure
+	 */
+	public function mxDelete( $zone, $fqdn, $id )
+	{
+		$result = $this->execute( "MXRecord/$zone/$fqdn/$id", 'DELETE' );
+		if ( 'success' == $result->status )
+		{
+			return TRUE;
+		}
+		return FALSE;
+	}
+
+	/*
+	 * get a list of MX records
+	 * @zone string the name of the zone to query
+	 * @fqdn string FQDN the FQDN of the host to query
+	 * @return mixed an array of MX records, or boolean false
+	 */
+	public function mxGetList( $zone, $fqdn )
+	{
+		$result = $this->execute( "MXRecord/$zone/$fqdn", 'GET' );
+		if ( 'success' == $result->status )
+		{
+			$exchanges = array();
+			foreach( $result->data as $data )
+			{
+				$exchanges[] = str_replace( "/REST/MXRecord/$zone/$fqdn/", '', $data );
+			}
+			return $exchanges;
+		}
+		return FALSE;
+	}
+
+	/*
+	 * get data about a specific MX record
+	 * @zone string the name of the zone to query
+	 * @fqdn string the FQDN of the host to query
+	 * @id int the Dynect record ID to query
+	 * @return mixed Associative array Dynect data, or boolean false
+	 */
+	public function mxGet( $zone, $fqdn, $id )
+	{
+		$result = $this->execute( "MXRecord/$zone/$fqdn/$id", 'GET' );
+		if ( 'success' == $result->status )
+		{
+			return $this->parse_dyn_object( $result->data );
 		}
 		return FALSE;
 	}
