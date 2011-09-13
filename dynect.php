@@ -288,6 +288,27 @@ class dynect
 	}
 
 	/*
+         * change the A record in a zone
+         * @zone string name of the zone to contain the record
+         * @fqdn string FQDN of the A record to create
+         * @ip string IP address of the A record to create
+         * @ttl int TTL value for the record, 0 uses zone default
+         * @return bool success or failure 
+         */
+        public function arecordUpdate ( $zone, $fqdn, $ip, $ttl = 0 )
+        {
+                $record = array( 'rdata' => array( 'address' => $ip, ),
+                                 'ttl' => $ttl,
+                                );
+                $result = $this->execute( "ARecord/$zone/$fqdn", 'PUT', $record );
+                if ( 'success' == $result->status )
+                {
+                        return TRUE;
+                }
+                return FALSE;
+        }
+
+        /*
 	 * delete an A record
 	 * @zone string name of the zone containing the A record
 	 * @fqdn string FQDN of the A record to delete
