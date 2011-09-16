@@ -28,7 +28,7 @@ if ( $dyn->login() ) {
 	// get a list of zones:
 	$zones = $dyn->zoneGetlist();
 	// show the raw API response for the previous action:
-	print_r( $nc->result );
+	print_r( $dyn->result );
 	
 	// create a new zone
 	if ( $dyn->zoneCreate( 'hostmaster@example.com', 'example.com', 3600 ) ) {
