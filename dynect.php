@@ -18,11 +18,11 @@ class dynect
 	/*
 	 * execute a call to the Dynect API
 	 * @command string the API command to invoke
-	 * @crud string HTTP verb to use (GET, PUT, POST, or DELETE)
+	 * @method string HTTP method to use (GET, PUT, POST, or DELETE)
 	 * @args array associative array of data to send
 	 * @return mixed the Dynect response
 	 */
-	private function execute( $command, $crud, $args = array() )
+	private function execute( $command, $method, $args = array() )
 	{
 		// empty result cache
 		$this->result = '';
@@ -40,7 +40,7 @@ class dynect
 		curl_setopt( $ch, CURLOPT_HEADER, false );
 		// Set the content type of the post body via HTTP headers
 		curl_setopt( $ch, CURLOPT_HTTPHEADER, $headers );
-		curl_setopt( $ch, CURLOPT_CUSTOMREQUEST, $crud );
+		curl_setopt( $ch, CURLOPT_CUSTOMREQUEST, $method );
 		// API endpoint to use
 		curl_setopt( $ch, CURLOPT_URL, $this->api_url . "/$command/" );
 		if ( ! empty( $args ) ) {
