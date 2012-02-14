@@ -3,6 +3,7 @@ class dynect
 {
 
 	protected $token;
+	public $response;
 
 	/*
 	 * execute a call to the Dynect API
@@ -13,6 +14,9 @@ class dynect
 	 */
 	protected function execute( $command, $method = 'GET', $args = array() )
 	{
+		// Reset the response cache
+		$this->result = null;
+
 		$headers = array( 'Content-Type: application/json' );
 		
 		if ( ! empty( $this->token ) )
@@ -48,6 +52,8 @@ class dynect
 		$response = curl_exec( $ch );
 
 		curl_close( $ch );
+		
+		$this->result = $response;
 
 		return json_decode( $response );
 	}
