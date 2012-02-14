@@ -1,6 +1,7 @@
 # Dynect-REST-PHP
 
 A simple PHP library for using the Dynect REST API.
+
 Learn more at http://dyn.com/developer.
 
 ## About
@@ -8,11 +9,11 @@ This is a simple single-file class for accessing the Dynect REST API.
 
 Methods are generally named after the corresponding API endpoint and HTTP verb associated with the desired action:
 
-PUT /REST/Zone/       == zoneCreate()
-DELETE /REST/Zone/    == zoneDelete()
+* PUT /REST/Zone/       == zoneCreate()
+* DELETE /REST/Zone/    == zoneDelete()
 
-PUT /REST/ARecord/    == arecordCreate()
-DELETE /REST/ARecord/ == arecordDelete()
+* PUT /REST/ARecord/    == arecordCreate()
+* DELETE /REST/ARecord/ == arecordDelete()
 
 Some endpoints accept variable inputs, in which case discrete methods have been provided to reduce ambiguity. For example, the REST/ARecord/ GET endpoint accepts an optional record ID. Without it, the API returns a list of A records assigned to the specified FQDN. With it, the API returns the specific data of the singularly identified A record. Within Dynect-PHP, this functionality has been made into two separate methods: arecordGetList() and arecordGet().
 
