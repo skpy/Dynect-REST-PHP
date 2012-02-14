@@ -590,4 +590,3 @@ class dynect
 		return FALSE;
 	}
 }
-?>
