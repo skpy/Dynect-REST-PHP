@@ -4,18 +4,15 @@ class dynect
 
 	protected $api_url;
 	protected $token;
-	protected $credentials;
 	public $result;
 
 	/*
 	 * instantiate a Dynect object
-	 * @credentials array Dynect credentials
 	 * @return object a Dynect object
 	 */
-	public function __construct( $credentials )
+	public function __construct()
 	{
 		$this->api_url = 'https://api2.dynect.net/REST';
-		$this->credentials = $credentials;
 	}
 
 	/*
@@ -83,11 +80,12 @@ class dynect
 
 	/*
 	 * log into the Dynect API and obtain an API token
+	 * @credentials array Dynect credentials
 	 * @return bool success or failure
 	 */
-	public function login()
+	public function login( $credentials )
 	{
-		$result = $this->execute( 'Session', 'POST', $this->credentials );
+		$result = $this->execute( 'Session', 'POST', $credentials );
 		if ( 'success' == $result->status )
 		{
 			$this->token = $result->data->token;
