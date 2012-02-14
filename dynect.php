@@ -4,6 +4,7 @@ class dynect
 
 	protected $token;
 	public $response;
+	protected $allowed_records = array('A', 'AAAA', 'CNAME', 'DNSKEY', 'DS', 'KEY', 'LOC', 'MX', 'NS', 'PTR', 'RP', 'SOA', 'SRV', 'TXT');
 
 	/*
 	 * execute a call to the Dynect API
@@ -114,8 +115,6 @@ class dynect
 		return false;
 	}
 
-/***** ZONES *****/
-
 	/*
 	 * create a new Dynect zone
 	 * @contact string email address for the contact of this zone
@@ -152,43 +151,18 @@ class dynect
 	}
 
 	/*
-	 * publish a zone
+	 * update a zone
 	 * @zone string name of the zone to publish
+	 * @status string status of the zone to update
 	 * @return bool success or failure
 	 */
-	public function zonePublish ( $zone )
+	public function zoneUpdate ( $zone, $status )
 	{
-		$result = $this->execute( "Zone/$zone", 'PUT', array( 'publish' => 'TRUE' ) );
-		if ( 'success' == $result->status )
+		if ( ! in_array( $status, array( 'publish', 'freeze', 'thaw' ) ) )
 		{
-			return TRUE;
+			return FALSE;
 		}
-		return FALSE;
-	}
-
-	/*
-	 * freeze a zone, preventing changes
-	 * @zone string Zone name
-	 * @return bool success or failure
-	 */
-	public function zoneFreeze( $zone )
-	{
-		$result = $this->execute( "Zone/$zone", 'PUT', array( 'freeze' => 'TRUE' ) );
-		if ( 'success' == $result->status )
-		{
-			return TRUE;
-		}
-		return FALSE;
-	}
-
-	/*
-	 * thaw a zone, permitting changes
-	 * @zone string Zone name
-	 * @return bool success or failure
-	 */
-	public function zoneThaw( $zone )
-	{
-		$result = $this->execute( "Zone/$zone", 'PUT', array( 'thaw' => 'TRUE' ) );
+		$result = $this->execute( "Zone/$zone", 'PUT', array( $status => 'TRUE' ) );
 		if ( 'success' == $result->status )
 		{
 			return TRUE;
@@ -230,8 +204,6 @@ class dynect
 		return FALSE;
 	}
 
-/***** NODES *****/
-
 	/*
 	 * delete a node, any records in it, and any nodes underneath it
 	 * @zone string Zone containing the node
@@ -269,14 +241,13 @@ class dynect
 		return FALSE;
 	}
 
-/***** RECORDS *****/
 	/*
 	 * get a list of A record IDs for an FQDN
 	 * @zone string name of the zone containing the A record
 	 * @fqdn string FQDN fo the A record to query
 	 * @return mixed array of Dynect IDs or boolean false
 	 */
-	public function allrecordsGetList( $zone, $fqdn ) 
+	public function allRecordsGetList( $zone, $fqdn ) 
 	{
 		$result = $this->execute( "AllRecord/$zone/$fqdn", 'GET' );
 		if ( 'success' == $result->status )
@@ -290,7 +261,7 @@ class dynect
 			{
 				$data = str_replace( "/REST/", '', $data );
 				$record = $this->execute( $data, 'GET');
-				if ( !empty( $record->data ) )
+				if ( ! empty( $record->data ) )
 				{
 					$records[] = $record->data;
 				}
@@ -300,75 +271,16 @@ class dynect
 		return FALSE;
 	}
 
-/***** A RECORDS *****/
 	/*
-	 * create a new A record in a zone
-	 * @zone string name of the zone to contain the record
-	 * @fqdn string FQDN of the A record to create
-	 * @ip string IP address of the A record to create
-	 * @ttl int TTL value for the record
-	 * @return bool success or failure 
-	 */
-	public function arecordAdd ( $zone, $fqdn, $ip, $ttl = 0 )
-	{
-		$record = array( 'rdata' => array( 'address' => $ip, ),
-				 'ttl' => $ttl,
-				);
-		$result = $this->execute( "ARecord/$zone/$fqdn", 'POST', $record );
-		if ( 'success' == $result->status )
-		{
-			return TRUE;
-		}
-		return FALSE;
-	}
-
-	/*
-	 * change the A record in a zone
-	 * @zone string name of the zone to contain the record
-	 * @fqdn string FQDN of the A record to create
-	 * @ip string IP address of the A record to create
-	 * @ttl int TTL value for the record, 0 uses zone default
-	 * @return bool success or failure 
-	 */
-	public function arecordUpdate ( $zone, $fqdn, $ip, $ttl = 0 )
-	{
-		$record = array( 'rdata' => array( 'address' => $ip, ),
-				 'ttl' => $ttl,
-				);
-		$result = $this->execute( "ARecord/$zone/$fqdn", 'PUT', $record );
-		if ( 'success' == $result->status )
-		{
-			return TRUE;
-		}
-		return FALSE;
-	}
-
-	/*
-	 * delete an A record
-	 * @zone string name of the zone containing the A record
-	 * @fqdn string FQDN of the A record to delete
-	 * @id int Dynect ID of the A record to delete
-	 * @return bool success or failure
-	 */
-	public function arecordDelete ( $zone, $fqdn, $id )
-	{
-		$result = $this->execute( "ARecord/$zone/$fqdn/$id", 'DELETE' );
-		if ( 'success' == $result->status )
-		{
-			return TRUE;
-		}
-		return FALSE;
-	}
-
-	/*
-	 * get a list of A record IDs for an FQDN
-	 * @zone string name of the zone containing the A record
-	 * @fqdn string FQDN fo the A record to query
+	 * get a list of record IDs for an FQDN
+	 * @type string type of record to get list
+	 * @zone string name of the zone containing the record
+	 * @fqdn string FQDN fo the record to query
 	 * @return mixed array of Dynect IDs or boolean false
 	 */
-	public function arecordGetList( $zone, $fqdn ) 
+	public function recordGetList( $type, $zone, $fqdn ) 
 	{
-		$result = $this->execute( "ARecord/$zone/$fqdn", 'GET' );
+		$result = $this->execute( "{$type}Record/$zone/$fqdn", 'GET' );
 		if ( 'success' == $result->status )
 		{
 			if ( empty( $result->data ) )
@@ -378,7 +290,7 @@ class dynect
 			$records = array();
 			foreach ( $result->data as $data )
 			{
-				$records[] = str_replace( "/REST/ARecord/$zone/$fqdn/", '', $data );
+				$records[] = str_replace( "/REST/{$type}Record/$zone/$fqdn/", '', $data );
 			}
 			return $records;
 		}
@@ -386,15 +298,16 @@ class dynect
 	}
 
 	/*
-	 * get data about a specific A record
-	 * @zone string name of the zone containing the A record
-	 * @fqdn string FQDN of the A record to query
+	 * get data about a specific record
+	 * @type string type of record to get
+	 * @zone string name of the zone containing the record
+	 * @fqdn string FQDN of the record to query
 	 * @id int Dynect ID of the record
 	 * @return mixed Associative array of record data, or boolean false
 	 */
-	public function arecordGet( $zone, $fqdn, $id = '' )
+	public function recordGet( $type, $zone, $fqdn, $id = '' )
 	{
-		$result = $this->execute( "ARecord/$zone/$fqdn/$id", 'GET' );
+		$result = $this->execute( "{$type}Record/$zone/$fqdn/$id", 'GET' );
 		if ( 'success' == $result->status )
 		{
 			return $this->parse_dyn_object( $result->data );
@@ -402,22 +315,23 @@ class dynect
 		return FALSE;
 	}
 
-/***** CNAMEs *****/
-
 	/*
-	 * create a new CNAME record
-	 * @zone string the name of the zone to contain the CNAME
-	 * @fqdn string the FQDN of the target of the CNAME record
-	 * @cname string the FQDN of the CNAME to create
-	 * @ttl int the TTL for the CNAME
-	 * @return bool success or failure
+	 * create a new record in a zone
+	 * @type string type of record to create
+	 * @zone string name of the zone to contain the record
+	 * @fqdn string FQDN of the record to create
+	 * @rdata string Rdata of the record to create
+	 * @ttl int TTL value for the record
+	 * @return bool success or failure 
 	 */
-	public function cnameAdd ( $zone, $fqdn, $cname, $ttl = 0 )
+	public function recordAdd ( $type, $zone, $fqdn, $rdata, $ttl = 0 )
 	{
-		$record = array( 'rdata' => array( 'cname' => $cname ),
-				'ttl' => $ttl,
-				);
-		$result = $this->execute( "CNAMERecord/$zone/$fqdn", 'POST', $record );
+		if ( ! in_array( $type, $this->allowed_records ) )
+		{
+			return FALSE;
+		}
+		$record = array( 'rdata' => $rdata, 'ttl' => $ttl, );
+		$result = $this->execute( "{$type}Record/$zone/$fqdn", 'POST', $record );
 		if ( 'success' == $result->status )
 		{
 			return TRUE;
@@ -426,15 +340,22 @@ class dynect
 	}
 
 	/*
-	 * delete a CNAME
-	 * @zone string name of the zone containing the CNAME
-	 * @fqdn string FQDN of the CNAME to delete
-	 * @id int Dynect ID of the CNAME
-	 * @return bool success or failure
+	 * change a record in a zone
+	 * @type string type of record to update
+	 * @zone string name of the zone to contain the record
+	 * @fqdn string FQDN of the record to update
+	 * @rdata string Rdata of the record to update
+	 * @ttl int TTL value for the record
+	 * @return bool success or failure 
 	 */
-	public function cnameDelete( $zone, $fqdn, $id )
+	public function recordUpdate ( $type, $zone, $fqdn, $rdata, $ttl = 0 )
 	{
-		$result = $this->execute( "CNAMERecord/$zone/$fqdn/$id", 'DELETE' );
+		if ( ! in_array( $type, $this->allowed_records ) )
+		{
+			return FALSE;
+		}
+		$record = array( 'rdata' => $rdata, 'ttl' => $ttl, );
+		$result = $this->execute( "{$type}Record/$zone/$fqdn", 'PUT', $record );
 		if ( 'success' == $result->status )
 		{
 			return TRUE;
@@ -443,123 +364,26 @@ class dynect
 	}
 
 	/*
-	 * get a list of CNAME records
-	 * @zone string the name of the zone to query
-	 * @fqdn string FQDN of the CNAME
-	 * @return mixed array of Dynect IDs or boolean false
+	 * delete a record in a zone
+	 * @type string type of record to delete
+	 * @zone string name of the zone to contain the record
+	 * @fqdn string FQDN of the record to delete
+	 * @id int Dynect ID of the record to delete
+	 * @return bool success or failure 
 	 */
-	public function cnameGetList( $zone, $fqdn )
+	public function recordDelete ( $type, $zone, $fqdn, $id )
 	{
-		$result = $this->execute( "CNAMERecord/$zone/$fqdn", 'GET' );
-		if ( 'success' == $result->status )
+		if ( ! in_array( $type, $this->allowed_records ) )
 		{
-			if ( empty( $result->data ) )
-			{
-				return FALSE;
-			}
-			$records = array();
-			foreach ( $result->data as $data );
-			{
-				$records[] = str_replace( "/REST/CNAMERecord/$zone/$fqdn/", '', $data );
-			}
-			return $records;
+			return FALSE;
 		}
-		return FALSE;
-	}
-
-	/*
-	 * get data about a specific CNAME
-	 * @zone string name of the zone containing the CNAME
-	 * @fqdn string FQDN of the CNAME
-	 * @id int Dynect ID of the CNAME
-	 * @return mixed Associative array of Dynect data or boolean false
-	 */
-	public function cnameGet( $zone, $fqdn, $id )
-	{
-		$result = $this->execute( "CNAMERecord/$zone/$fqdn/$id", 'GET' );
-		if ( 'success' == $result->status )
-		{
-			return $this->parse_dyn_object( $result->data );
-		}
-		return FALSE;
-	}
-
-/***** MX Records *****/
-	/*
-	 * add a new MX record
-	 * @zone string the zone in which to add the MX
-	 * @fqdn string the FQDN of the host for which the MX is added
-	 * @exchange string the FQDN of the host handling mail
-	 * @preference int the ranked preference for the exchange
-	 * @ttl int optional TTL. Zone default will be used if not supplied
-	 * @return bool success or failure
-	 */
-	public function mxAdd( $zone, $fqdn, $exchange, $preference, $ttl = 0 )
-	{
-		$result = $this->execute( "MXRecord/$zone/$fqdn", 'POST', array( 'exchange' => $exchange, 'preference' => $preference, 'ttl' => $ttl ) );
+		$result = $this->execute( "{$type}Record/$zone/$fqdn/$id", 'DELETE' );
 		if ( 'success' == $result->status )
 		{
 			return TRUE;
 		}
 		return FALSE;
 	}
-
-	/*
-	 * delete an MX record
-	 * @zone string the zone from which to delete the MX
-	 * @fqdn string the FQDN of the host from which to delete the MX
-	 * @id int the Dynect ID of the MX record to delete
-	 * @return bool success or failure
-	 */
-	public function mxDelete( $zone, $fqdn, $id )
-	{
-		$result = $this->execute( "MXRecord/$zone/$fqdn/$id", 'DELETE' );
-		if ( 'success' == $result->status )
-		{
-			return TRUE;
-		}
-		return FALSE;
-	}
-
-	/*
-	 * get a list of MX records
-	 * @zone string the name of the zone to query
-	 * @fqdn string FQDN the FQDN of the host to query
-	 * @return mixed an array of MX records, or boolean false
-	 */
-	public function mxGetList( $zone, $fqdn )
-	{
-		$result = $this->execute( "MXRecord/$zone/$fqdn", 'GET' );
-		if ( 'success' == $result->status )
-		{
-			$exchanges = array();
-			foreach( $result->data as $data )
-			{
-				$exchanges[] = str_replace( "/REST/MXRecord/$zone/$fqdn/", '', $data );
-			}
-			return $exchanges;
-		}
-		return FALSE;
-	}
-
-	/*
-	 * get data about a specific MX record
-	 * @zone string the name of the zone to query
-	 * @fqdn string the FQDN of the host to query
-	 * @id int the Dynect record ID to query
-	 * @return mixed Associative array Dynect data, or boolean false
-	 */
-	public function mxGet( $zone, $fqdn, $id )
-	{
-		$result = $this->execute( "MXRecord/$zone/$fqdn/$id", 'GET' );
-		if ( 'success' == $result->status )
-		{
-			return $this->parse_dyn_object( $result->data );
-		}
-		return FALSE;
-	}
-
-/***** HTTP Redirect *****/
 
 	/*
 	 * create a new HTTP redirect
@@ -605,9 +429,6 @@ class dynect
 	{
 		$result = $this->execute( "HTTPRedirect/$zone", 'GET' );
 		if ( 'success' == $result->status ) {
-			if ( empty ( $result->status ) ) {
-				return FALSE;
-			}
 			$redirects = array();
 			foreach ( $result->data as $data ) {
 				$redirects[] = rtrim( str_replace( "/REST/HTTPRedirect/$zone/", '', $data ), '/' );
