@@ -269,6 +269,37 @@ class dynect
 		return FALSE;
 	}
 
+/***** RECORDS *****/
+	/*
+	 * get a list of A record IDs for an FQDN
+	 * @zone string name of the zone containing the A record
+	 * @fqdn string FQDN fo the A record to query
+	 * @return mixed array of Dynect IDs or boolean false
+	 */
+	public function allrecordsGetList( $zone, $fqdn ) 
+	{
+		$result = $this->execute( "AllRecord/$zone/$fqdn", 'GET' );
+		if ( 'success' == $result->status )
+		{
+			if ( empty( $result->data ) )
+			{
+				return FALSE;
+			}
+			$records = array();
+			foreach ( $result->data as $data )
+			{
+				$data = str_replace( "/REST/", '', $data );
+				$record = $this->execute( $data, 'GET');
+				if ( !empty( $record->data ) )
+				{
+					$records[] = $record->data;
+				}
+			}
+			return $records;
+		}
+		return FALSE;
+	}
+
 /***** A RECORDS *****/
 	/*
 	 * create a new A record in a zone
