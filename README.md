@@ -18,7 +18,7 @@ Some endpoints accept variable inputs, in which case discrete methods have been 
 
 Most methods return either the data requested from the API endpoint, or boolean false on failure of any sort.
 
-The raw response from the Dynect API is available as a public variable "$response".
+The raw response from the Dynect API is available as a public variable `$response`.
 
 ## Usage
 ```php
