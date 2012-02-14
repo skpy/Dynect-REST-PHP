@@ -2,7 +2,6 @@
 class dynect
 {
 
-	protected $api_url;
 	protected $token;
 	public $result;
 
@@ -12,7 +11,7 @@ class dynect
 	 */
 	public function __construct()
 	{
-		$this->api_url = 'https://api2.dynect.net/REST';
+		
 	}
 
 	/*
@@ -42,7 +41,7 @@ class dynect
 		curl_setopt( $ch, CURLOPT_HTTPHEADER, $headers );
 		curl_setopt( $ch, CURLOPT_CUSTOMREQUEST, $method );
 		// API endpoint to use
-		curl_setopt( $ch, CURLOPT_URL, $this->api_url . "/$command/" );
+		curl_setopt( $ch, CURLOPT_URL, 'https://api2.dynect.net/REST/'.$command.'/' );
 		if ( ! empty( $args ) ) {
 			curl_setopt( $ch, CURLOPT_POSTFIELDS, json_encode( $args ) );
 		}
