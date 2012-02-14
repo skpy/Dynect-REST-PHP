@@ -20,11 +20,12 @@ The raw response from the Dynect API is available as a public variable "$result"
 
 *** USAGE ***
 include_once( 'dynect.php' );
-$account = array( 'customer_name' => 'somecustomer',
-			'user_name' => 'someuser',
-			'password' => 'somepass' );
-$dyn = new Dynect( $account );
-if ( $dyn->login() ) {
+$customer_name = 'somecustomer';
+$user_name = 'someuser';
+$password = 'somepass';
+
+$dyn = new Dynect();
+if ( $dyn->login( $customer_name, $user_name, $password ) ) {
 	// get a list of zones:
 	$zones = $dyn->zoneGetlist();
 	// show the raw API response for the previous action:
