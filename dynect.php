@@ -2,9 +2,9 @@
 class dynect
 {
 
-	private $api_url;
-	private $token;
-	private $credentials;
+	protected $api_url;
+	protected $token;
+	protected $credentials;
 	public $result;
 
 	/*
