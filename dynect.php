@@ -57,7 +57,7 @@ class dynect
 	 * @data object an object of Dyn data
 	 * @return array Associative array of object key/value pairs
 	 */
-	private function parse_dyn_object( $data )
+	protected function parse_dyn_object( $data )
 	{
 		$arr = array();
 		foreach ( $data as $key => $value )
