@@ -20,31 +20,45 @@ class dynect
 	 * @args array associative array of data to send
 	 * @return mixed the Dynect response
 	 */
-	private function execute( $command, $method, $args = array() )
+	protected function execute( $command, $method, $args = array() )
 	{
 		$headers = array( 'Content-Type: application/json' );
-		if ( ! empty( $this->token ) ) {
+		
+		if ( ! empty( $this->token ) )
+		{
 			$headers[] = 'Auth-Token: ' . $this->token;
 		}
+
 		$ch = curl_init();
-		// return the transfer as a string of the return value 
-		// instead of outputting it out directly. 
+
+		// Return the transfer as a string of the return value instead of outputting it out directly
 		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
+		
 		// Do not fail silently. We want a response regardless
 		curl_setopt( $ch, CURLOPT_FAILONERROR, false );
-		// disables response header and only returns the response body 
+		
+		// Disables response header and only returns the response body
 		curl_setopt( $ch, CURLOPT_HEADER, false );
+		
 		// Set the content type of the post body via HTTP headers
 		curl_setopt( $ch, CURLOPT_HTTPHEADER, $headers );
+
+		// Set the custom request method
 		curl_setopt( $ch, CURLOPT_CUSTOMREQUEST, $method );
-		// API endpoint to use
-		curl_setopt( $ch, CURLOPT_URL, 'https://api2.dynect.net/REST/'.$command.'/' );
-		if ( ! empty( $args ) ) {
+		
+		// Set the URL to send the request to the API
+		curl_setopt( $ch, CURLOPT_URL, 'https://api2.dynect.net/REST/' . $command . '/' );
+		
+		if ( ! empty( $args ) )
+		{
 			curl_setopt( $ch, CURLOPT_POSTFIELDS, json_encode( $args ) );
 		}
-		$result = curl_exec( $ch );
+
+		$response = curl_exec( $ch );
+
 		curl_close( $ch );
-		return json_decode( $result );
+
+		return json_decode( $response );
 	}
 
 	/*
