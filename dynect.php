@@ -11,7 +11,7 @@ class dynect
 	 * @args array associative array of data to send
 	 * @return mixed the Dynect response
 	 */
-	protected function execute( $command, $method, $args = array() )
+	protected function execute( $command, $method = 'GET', $args = array() )
 	{
 		$headers = array( 'Content-Type: application/json' );
 		
