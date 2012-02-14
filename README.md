@@ -1,8 +1,6 @@
 # Dynect-REST-PHP
 
-A simple PHP library for using the Dynect REST API.
-
-Learn more at http://dyn.com/developer.
+A simple PHP library for using the [Dynect REST API](http://dyn.com/developer).
 
 ## About
 This is a simple single-file class for accessing the Dynect REST API.
