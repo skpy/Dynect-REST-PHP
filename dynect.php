@@ -15,7 +15,7 @@ class dynect
 	protected function execute( $command, $method = 'GET', $args = array() )
 	{
 		// Reset the response cache
-		$this->result = null;
+		$this->response = null;
 
 		$headers = array( 'Content-Type: application/json' );
 		
@@ -53,7 +53,7 @@ class dynect
 
 		curl_close( $ch );
 		
-		$this->result = $response;
+		$this->response = $response;
 
 		return json_decode( $response );
 	}
