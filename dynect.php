@@ -3,7 +3,6 @@ class dynect
 {
 
 	protected $token;
-	public $result;
 
 	/*
 	 * instantiate a Dynect object
@@ -23,8 +22,6 @@ class dynect
 	 */
 	private function execute( $command, $method, $args = array() )
 	{
-		// empty result cache
-		$this->result = '';
 		$headers = array( 'Content-Type: application/json' );
 		if ( ! empty( $this->token ) ) {
 			$headers[] = 'Auth-Token: ' . $this->token;
@@ -46,7 +43,6 @@ class dynect
 			curl_setopt( $ch, CURLOPT_POSTFIELDS, json_encode( $args ) );
 		}
 		$result = curl_exec( $ch );
-		$this->result = $result;
 		curl_close( $ch );
 		return json_decode( $result );
 	}
