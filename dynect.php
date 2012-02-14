@@ -5,15 +5,6 @@ class dynect
 	protected $token;
 
 	/*
-	 * instantiate a Dynect object
-	 * @return object a Dynect object
-	 */
-	public function __construct()
-	{
-		
-	}
-
-	/*
 	 * execute a call to the Dynect API
 	 * @command string the API command to invoke
 	 * @method string HTTP method to use (GET, PUT, POST, or DELETE)
