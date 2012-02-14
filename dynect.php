@@ -83,9 +83,9 @@ class dynect
 	 * @credentials array Dynect credentials
 	 * @return bool success or failure
 	 */
-	public function login( $credentials )
+	public function login( $customer_name, $user_name, $password )
 	{
-		$result = $this->execute( 'Session', 'POST', $credentials );
+		$result = $this->execute( 'Session', 'POST', array('customer_name' => $customer_name, 'user_name' => $user_name, 'password' => $password) );
 		if ( 'success' == $result->status )
 		{
 			$this->token = $result->data->token;
