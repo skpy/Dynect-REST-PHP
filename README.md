@@ -37,6 +37,24 @@ if ( $dyn->login( $customer_name, $user_name, $password ) ) {
 	if ( $dyn->zoneCreate( 'hostmaster@example.com', 'example.com', 3600 ) ) {
 		echo 'Zone example.com successfully created.';
 	}
+	// Publish and commit changes
+        $published = $dyn->zoneUpdate($domain, 'publish');
+
+	// Get contents of BIND file
+        $BIND = file_get_contents('/files/example.com.zone.txt');  
+
+	// Bulk update from BIND file
+	$resultBulk = $dyn->bulkUpdate( 'example.com' , $BIND );
+
+	// Track job 
+	$job_id = $resultBulk->job_id ; 
+	$Jobresult = $dyn->jobGet( $job_id );
+	print_r( $Jobresult );
+	
+	// Publish and commit changes
+        $published = $dyn->zoneUpdate($domain, 'publish');
+
+	
 	$dyn->logout();
 }
 ```
