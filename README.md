@@ -38,9 +38,10 @@ if ( $dyn->login( $customer_name, $user_name, $password ) ) {
 		echo 'Zone example.com successfully created.';
 	}
 	// Publish and commit changes
-        $published = $dyn->zoneUpdate($domain, 'publish');
+        $published = $dyn->zoneUpdate('example.com', 'publish');
 
-	// Get contents of BIND file
+	// Get contents of BIND file 
+	// This example shows how to get from disk
         $BIND = file_get_contents('/files/example.com.zone.txt');  
 
 	// Bulk update from BIND file
@@ -52,7 +53,7 @@ if ( $dyn->login( $customer_name, $user_name, $password ) ) {
 	print_r( $Jobresult );
 	
 	// Publish and commit changes
-        $published = $dyn->zoneUpdate($domain, 'publish');
+        $published = $dyn->zoneUpdate('example.com', 'publish');
 
 	
 	$dyn->logout();
