@@ -507,4 +507,19 @@ class dynect
 		return $result;
 	}
 
+	/*
+	 * get Zone Notes
+	 * @zone string name of zone to query
+	 * @fqdn string FQDN of the redirect to query
+	 * @return mixed Object of Dynect data or boolean false
+	 */
+	public function ZoneNoteReport( $zone, $limit = 1, $offset = 0 )
+	{
+		$result = $this->execute( "ZoneNoteReport", 'POST', array('zone' => $zone, 'limit' => $limit, 'offset' => $offset ) );
+		if ( 'success' == $result->status ) {
+			return $result->data;
+		}
+		return FALSE;
+	}
+
 }
