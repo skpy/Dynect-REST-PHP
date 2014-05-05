@@ -452,4 +452,74 @@ class dynect
 		}
 		return FALSE;
 	}
+	/*
+	 * GET Job data
+	 * @job string job ID
+	 * @return mixed Object of Dynect data or boolean false
+	 */
+	public function jobGet( $job)
+	{
+		$result = $this->execute( "Job/$job/", 'GET' );
+			return $result;
+		if ( 'success' == $result->status ) {
+			return $result;
+		}
+		return FALSE;
+	}
+
+	/*
+	 * Bulk Upload a BIND file to create or update zone
+	 * @zone string name of zone to upload
+	 * @BINDfile string path to file containing BIND zone
+	 * @return mixed Object of Dynect data or boolean false
+	 */
+	protected function ZoneFile( $zone, $BINDfile, $BulkMethod )
+	{
+		$args = array( 'file' => $BINDfile );
+		$result = $this->execute( "ZoneFile/$zone/", $BulkMethod, $args );
+		if ( 'success' == $result->status ) {
+			return $result;
+		}
+		return FALSE;
+	}
+	/*
+	 * Proxy for ZoneFile to create zone
+	 * @zone string name of zone to upload
+	 * @BINDfile string path to file containing BIND zone
+	 * @return mixed Object of Dynect data or boolean false
+	 */
+
+	public function bulkCreate( $zone, $BINDfile )
+	{
+		$result = $this->ZoneFile( $zone, $BINDfile, 'POST' );
+		return $result;
+	}
+
+	/*
+	 * Proxy for ZoneFile to update zone
+	 * @zone string name of zone to upload
+	 * @BINDfile string path to file containing BIND zone
+	 * @return mixed Object of Dynect data or boolean false
+	 */
+	public function bulkUpdate( $zone, $BINDfile )
+	{
+		$result = $this->ZoneFile( $zone, $BINDfile, 'PUT' );
+		return $result;
+	}
+
+	/*
+	 * get Zone Notes
+	 * @zone string name of zone to query
+	 * @fqdn string FQDN of the redirect to query
+	 * @return mixed Object of Dynect data or boolean false
+	 */
+	public function ZoneNoteReport( $zone, $limit = 1, $offset = 0 )
+	{
+		$result = $this->execute( "ZoneNoteReport", 'POST', array('zone' => $zone, 'limit' => $limit, 'offset' => $offset ) );
+		if ( 'success' == $result->status ) {
+			return $result->data;
+		}
+		return FALSE;
+	}
+
 }
